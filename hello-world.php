@@ -3185,22 +3185,20 @@ if (isset($_REQUEST['plan'])) {
 // - The form will reload the page when submitted
 // - You'll see the values in the URL: ?member_id=123&email=test@test.com
 
-?>
-
-<!-- 1 - HTML FORM HERE -->
+/* 1, 2, 3 and 4 - HTML FORM HERE
 
 <form method="get" action="">
-  <!-- 2, 3 and 4-->
+  
    <input id="member_id" type="text" name="member_id">
    <label for ="member_id">Member ID</label></br></br>
    <input id="email" type="text" name="email">
    <label for ="email">Email</label></br></br>
    <input type="submit">
-</form>
-<?php
+</form> */
+
 // YOUR PHP LOGIC HERE TO DISPLAY RESULTS
 
-echo "<h3>Exercise 30: member search tool</h3>";
+/* echo "<h3>Exercise 30: member search tool</h3>";
 
 #5
 
@@ -3214,4 +3212,64 @@ if (isset($_REQUEST['email'])) {
 
 if (empty($_REQUEST['member_id']) && empty($_REQUEST['email'])) {
   echo "<strong><span style='color:red'>Fill out the form above to search</span></strong>";
+} */
+
+
+// ============================================
+// SECTION 19: $_POST
+// Exercise 31: login form with POST method
+// ============================================
+
+// SCENARIO:
+// You're building a login form for MemberPress. Login forms should use POST 
+// (not GET) because passwords shouldn't appear in the URL.
+
+// YOUR TASK:
+// 1. Create an HTML form with method="POST" and action="" (submits to itself)
+// 2. Add a text input for "username" with a label
+// 3. Add a password input for "password" with a label
+// 4. Add a submit button with text "Log In"
+// 5. Below the form, check if the form was submitted:
+//    - If 'username' exists in $_POST, echo "Logging in as: [username]"
+//    - If 'password' exists in $_POST, echo "Password received: [show length only, not the actual password]"
+//      Hint: use strlen() to show password length like "Password received (8 characters)"
+//    - If neither exists, echo "Enter your credentials above"
+//
+// NOTES:
+// - Now using $_POST specifically (since we're learning POST method)
+// - Notice how the URL stays clean when you submit (no ?user
+
+?>
+
+<form method="post" action ="">
+  <input type="text" name="username">
+  <label for="username">Username</label><br>
+  <input type="password" name="password">
+  <label for="password">Password</label><br>
+  <input type="submit" value="Log in"><br>
+  
+
+</form>
+
+<?php
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+
+  if (!empty($_POST['username'])) {
+    $username = htmlspecialchars($_POST['username']);
+    echo "Logging in as: $username <br>";
+  } else {
+    echo "No username provided <br>";
+  }
+
+  if (!empty($_POST['password'])) {
+    $pwd_lenght = strlen($_POST['password']);
+    echo "Password received ($pwd_lenght characters) <br>";
+  } else {
+    echo "No password entered <br>";
+  }
+
+  if (empty ($_POST['username']) && empty ($_POST['password'])) {
+    echo 'Enter your credentials above';
+  }
 }
