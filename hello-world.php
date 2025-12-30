@@ -1,5 +1,6 @@
 <?php
 declare(strict_types=1); // strict requirement
+session_start(); // start tye session
 
 // ============================================
 // SECTION 1: COMMENTS
@@ -3279,7 +3280,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 // Exercise 32: reading a user preference cookie
 // ============================================
 
-echo "<h3>Exercise: Basic \$_COOKIE handling</h3>";
+/* echo "<h3>Exercise: Basic \$_COOKIE handling</h3>";
 
 // SCENARIO:
 // You're building a simple MemberPress-related page.
@@ -3301,4 +3302,34 @@ if ( isset ( $_COOKIE['preferred_plan'] ) ) {
   echo "Preferred plan: {$_COOKIE['preferred_plan']}";
 } else {
   echo "No preferred plan set";
+} */
+
+// ============================================
+// SECTION 21: $_SESSION
+// Exercise 33: simple session-based user state
+// ============================================
+
+// IMPORTANT:
+// session_start() must be called before any output
+
+echo "<h3>Exercise: Basic \$_SESSION handling</h3>";
+
+// SCENARIO:
+// You're tracking whether a visitor is logged in.
+// If a session variable 'user_name' exists, show it.
+// Otherwise, set it and show a welcome message.
+
+// YOUR TASK:
+// 1. Check if $_SESSION['user_name'] exists
+// 2. If it exists, echo "Welcome back, [user_name]"
+// 3. If it does not exist, set $_SESSION['user_name'] = 'Euler'
+//    and echo "Session started for Euler"
+
+// YOUR CODE HERE
+
+if ( isset( $_SESSION['user_name'] ) ) {
+  echo "Welcome back, {$_SESSION['user_name']}";
+} else {
+  $_SESSION['user_name'] = 'Euler';
+  echo "Session started for {$_SESSION['user_name']}";
 }
