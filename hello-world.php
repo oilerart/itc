@@ -3312,7 +3312,7 @@ if ( isset ( $_COOKIE['preferred_plan'] ) ) {
 // IMPORTANT:
 // session_start() must be called before any output
 
-echo "<h3>Exercise: Basic \$_SESSION handling</h3>";
+/* echo "<h3>Exercise: Basic \$_SESSION handling</h3>";
 
 // SCENARIO:
 // You're tracking whether a visitor is logged in.
@@ -3332,4 +3332,29 @@ if ( isset( $_SESSION['user_name'] ) ) {
 } else {
   $_SESSION['user_name'] = 'Euler';
   echo "Session started for {$_SESSION['user_name']}";
+} */
+
+// ============================================
+// SECTION 22: $_GET
+// Exercise 34: simple member filter via URL
+// ============================================
+
+echo "<h3>Exercise: Basic \$_GET handling</h3>";
+
+// SCENARIO:
+// You're building a MemberPress admin-style filter.
+// The page may receive a URL parameter like:
+// ?membership=pro
+
+// YOUR TASK:
+// 1. Check if $_GET['membership'] exists
+// 2. If it exists, echo "Filtering by membership: [value]"
+// 3. If it does not exist, echo "Showing all memberships"
+
+// YOUR CODE HERE
+
+if ( isset ( $_GET['membership'] ) ) {
+  echo "Filtering by membership: {$_GET['membership']}";
+} else {
+  echo "No membership filter applied";
 }
