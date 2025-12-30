@@ -3239,19 +3239,19 @@ if (empty($_REQUEST['member_id']) && empty($_REQUEST['email'])) {
 // - Now using $_POST specifically (since we're learning POST method)
 // - Notice how the URL stays clean when you submit (no ?user
 
-?>
+/*
 
 <form method="post" action ="">
-  <input type="text" name="username">
+  <input type="text" name="username" id="username">
   <label for="username">Username</label><br>
   <input type="password" name="password">
-  <label for="password">Password</label><br>
+  <label for="password" id="password">Password</label><br>
   <input type="submit" value="Log in"><br>
   
 
 </form>
 
-<?php
+
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
@@ -3263,8 +3263,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   }
 
   if (!empty($_POST['password'])) {
-    $pwd_lenght = strlen($_POST['password']);
-    echo "Password received ($pwd_lenght characters) <br>";
+    $pwd_length = strlen($_POST['password']);
+    echo "Password received ($pwd_length characters) <br>";
   } else {
     echo "No password entered <br>";
   }
@@ -3272,4 +3272,33 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   if (empty ($_POST['username']) && empty ($_POST['password'])) {
     echo 'Enter your credentials above';
   }
+} */
+
+// ============================================
+// SECTION 20: $_COOKIE
+// Exercise 32: reading a user preference cookie
+// ============================================
+
+echo "<h3>Exercise: Basic \$_COOKIE handling</h3>";
+
+// SCENARIO:
+// You're building a simple MemberPress-related page.
+// If a visitor has a cookie named "preferred_plan", you want to display it.
+// Otherwise, show a default message.
+
+// YOUR TASK:
+// 1. Check if a cookie named 'preferred_plan' exists
+// 2. If it exists, echo "Preferred plan: [value]"
+// 3. If it does not exist, echo "No preferred plan set"
+
+// YOUR CODE HERE
+
+// let's say we have the cookie set at some place, in this case, it'd be here (generally it comes from the browser though):
+
+// setcookie('preferred_plan', 'Scale', time() + 3600);
+
+if ( isset ( $_COOKIE['preferred_plan'] ) ) {
+  echo "Preferred plan: {$_COOKIE['preferred_plan']}";
+} else {
+  echo "No preferred plan set";
 }
