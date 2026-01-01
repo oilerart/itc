@@ -3339,7 +3339,7 @@ if ( isset( $_SESSION['user_name'] ) ) {
 // Exercise 34: simple member filter via URL
 // ============================================
 
-echo "<h3>Exercise: Basic \$_GET handling</h3>";
+/* echo "<h3>Exercise: Basic \$_GET handling</h3>";
 
 // SCENARIO:
 // You're building a MemberPress admin-style filter.
@@ -3357,4 +3357,39 @@ if ( isset ( $_GET['membership'] ) ) {
   echo "Filtering by membership: {$_GET['membership']}";
 } else {
   echo "No membership filter applied";
+} */
+
+// ============================================
+// SECTION 20: REGULAR EXPRESSIONS
+// Exercise 32: checking if email contains @ symbol
+// ============================================
+
+// SCENARIO:
+// You need to do a quick check if a string looks like an email.
+
+// YOUR TASK:
+// 1. Create a variable $email with value "euler@caseproof.com"
+// 2. Use preg_match() to check if it contains an @ symbol
+//    Pattern: "/@/"
+// 3. If it matches, echo "Looks like an email"
+// 4. If it doesn't match, echo "Not an email format"
+// 5. Test again with $email = "eulercaseproof.com" (no @)
+//
+// NOTES:
+// - preg_match() returns 1 if found, 0 if not found
+// - The pattern goes between the / / slashes
+
+// YOUR CODE HERE
+
+echo "<h3>Exercise 32: checking for @ symbol</h3>";
+
+$email = 'euler@caseproof.com';
+
+
+$pattern = "/@/";
+
+if ( preg_match($pattern, $email) ) {
+  echo "Looks like an email";
+} else {
+  echo "Not an email format";
 }
