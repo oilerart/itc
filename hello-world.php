@@ -3381,7 +3381,7 @@ if ( isset ( $_GET['membership'] ) ) {
 
 // YOUR CODE HERE
 
-echo "<h3>Exercise 32: checking for @ symbol</h3>";
+/* echo "<h3>Exercise 32: checking for @ symbol</h3>";
 
 $email = 'euler@caseproof.com';
 
@@ -3392,4 +3392,37 @@ if ( preg_match($pattern, $email) ) {
   echo "Looks like an email";
 } else {
   echo "Not an email format";
+} */
+
+// ============================================
+// SECTION 20: REGULAR EXPRESSIONS
+// Exercise 33: checking email domain
+// ============================================
+
+// SCENARIO:
+// You want to check if an email belongs to the "caseproof.com" domain.
+
+// YOUR TASK:
+// 1. Create a variable $email with value "euler@caseproof.com"
+// 2. Use preg_match() to check if the email ends with "@caseproof.com"
+//    Pattern hint: "/@caseproof\.com$/"
+// 3. If it matches, echo "CaseProof email detected"
+// 4. If it doesn't match, echo "Not a CaseProof email"
+// 5. Test again with: "euler@gmail.com"
+
+// NOTES:
+// - The dot (.) must be escaped as \.
+// - The $ symbol means "end of string"
+// - You are still doing a simple yes/no check
+
+// YOUR CODE HERE
+
+$email = 'euler@caseproof.com';
+
+$pattern = '/@caseproof/i';
+
+if ( preg_match($pattern, $email) ){
+  echo "Caseproof email detected";
+} else {
+  echo "Not a CaseProof email";
 }
