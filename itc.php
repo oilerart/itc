@@ -26,6 +26,15 @@ function itc_deactivate() {
 
 }
 
-add_action( 'plugins_loaded', function() {
+class ITC {
+    
+    public function __construct() {
 
-});
+    }
+
+    public static function init() {
+        new self();
+    }
+}
+
+add_action( 'plugins_loaded', array( 'ITC', 'init' ) );
