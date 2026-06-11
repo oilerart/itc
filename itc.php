@@ -1,10 +1,11 @@
 <?php
 
 /**
- * Plugin Name: itc - is this cached?
+ * Plugin Name: ITC - is this cached?
  * Description: Detects caching layers for any WordPress content.
  * Version: 0.1.0
  * Author: oilerart
+ * Author URI: https://oiler.art.br
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -29,11 +30,25 @@ function itc_deactivate() {
 class ITC {
     
     public function __construct() {
-
+        add_action( 'admin_menu' , array( $this, 'register_menu') );
     }
 
     public static function init() {
         new self();
+    }
+
+    public function register_menu() {
+        add_options_page(
+            'ITC - is this cached?',
+            'ITC',
+            'manage_options',
+            'itc',
+            array ( $this, 'render_page' )
+        );
+    }
+
+    public function render_page() {
+        echo '<div class="wrap"><h1>Is this cached?</h1></div>';
     }
 }
 
