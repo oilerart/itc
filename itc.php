@@ -48,7 +48,16 @@ class ITC {
     }
 
     public function render_page() {
-        echo '<div class="wrap"><h1>Is this cached?</h1></div>';
+        ?>
+        <div class="wrap">
+            <h1>Is this cached?</h1>
+            <form method="post">
+                <?php wp_nonce_field( 'itc_scan', 'itc_nonce' ); ?>
+                <input type="url" name="itc_url" placeholder="https://example.com" class="regular-text">
+                <input type="submit" class="button button-primary" value="Scan">
+            </form>    
+        </div>
+        <?php
     }
 }
 
