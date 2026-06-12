@@ -48,7 +48,14 @@ class ITC {
     }
 
     public function render_page() {
+        
+        $scanned_url = '';
+
+        if ( isset( $_POST['itc_nonce'] ) && wp_verify_nonce( $_POST['itc_nonce'], 'itc_scan' ) ) {
+            $scanned_url = esc_url_raw( $_POST['itc_url'] ?? '' );
+        }
         ?>
+
         <div class="wrap">
             <h1>Is this cached?</h1>
             <form method="post">
@@ -57,7 +64,11 @@ class ITC {
                 <input type="submit" class="button button-primary" value="Scan">
             </form>    
         </div>
-        <?php
+
+        <?php if ($scanned_url ) : ?>
+            <p>Scanning: <?php echo esc_url ( $scanned_url ); ?></p>
+        <?php endif;
+
     }
 }
 
