@@ -65,8 +65,22 @@ class ITC {
             </form>    
         </div>
 
-        <?php if ($scanned_url ) : ?>
+        <?php if ( $scanned_url ) :
+        
+            $response = wp_remote_get( $scanned_url );
+
+            $cache_control = '';
+            $error = '';    
+            if ( is_wp_error( $response ) ) {
+                $error = $response->get_error_message();
+            } else {
+                $headers = wp_remote_retrieve_headers( $response );
+                $cache_control = $headers['cache-control'] ?? '';
+            }
+            ?>
             <p>Scanning: <?php echo esc_url ( $scanned_url ); ?></p>
+            <p>Cache control: <?php echo esc_html( $cache_control ); ?></p>
+        
         <?php endif;
 
     }
