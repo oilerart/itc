@@ -56,6 +56,7 @@ class ITC {
         $etag = '';
         $last_modified = '';
         $age = '';
+        $verdict = '';
 
         if ( isset( $_POST['itc_nonce'] ) && wp_verify_nonce( $_POST['itc_nonce'], 'itc_scan' ) ) {
             $scanned_url = esc_url_raw( $_POST['itc_url'] ?? '' );
@@ -72,6 +73,16 @@ class ITC {
                     $etag = $headers['etag'] ?? '';
                     $last_modified = $headers['last-modified'] ?? '';
                     $age = $headers['age'] ?? '';
+
+                    if ( $age !== '' && (int) $age > 0 ) {
+                        $verdict = 'Currently served from cache';
+                    } elseif ( str_contains( $cache_control, 'no-store' ) ) {
+                        $verdict = 'Not cacheable (no-store)';
+                    } elseif ( str_contains( $cache_control, 'public' ) || str_contains( $cache_control, 'max-age' ) || $expires !== '' ) {
+                        $verdict = 'Cacheable, but not currently cached';
+                    } else {
+                        $verdict = 'No cache headers found';
+                    }
                 }
             }
 
@@ -90,8 +101,14 @@ class ITC {
             <?php if ( $error ) : ?>
                 <p>Error: <?php echo esc_html( $error ); ?></p>
             <?php elseif ( $scanned_url ) : ?>
-                <p>Scanning: <?php echo esc_url( $scanned_url ); ?> </p>
+                <p>Scanning: <?php echo esc_url( $scanned_url ); ?></p>
                 <p>Cache control: <?php echo esc_html( $cache_control ); ?></p>
+                <p>Expires: <?php echo esc_html( $expires ); ?></p>
+                <p>Etag: <?php echo esc_html( $etag ); ?></p>
+                <p>Last modified: <?php echo esc_html( $last_modified ); ?></p>                
+                <p>Age: <?php echo esc_html( $age ); ?></p>
+                <p><strong>Verdict: <?php echo esc_html( $verdict ); ?></strong></p>
+                
             <?php endif; ?>
         </div>
 
