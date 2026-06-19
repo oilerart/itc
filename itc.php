@@ -43,8 +43,79 @@ class ITC {
             'ITC',
             'manage_options',
             'itc',
-            array ( $this, 'render_page' )
+            array ( $this, 'render_page' ),
+            0,
         );
+    }
+
+    public function scan($url) {
+
+        $error = '';
+        $cache_control = '';
+        $expires = '';
+        $etag = '';
+        $last_modified = '';
+        $age = '';
+        $verdict = '';
+        $cf_cache_status = '';
+        $cf_ray = '';
+        $x_cache = '';
+        $via = '';
+        $cdn = '';
+
+        $response = wp_remote_get( $url );
+
+        if ( is_wp_error( $response ) ) {
+            $error = $response->get_error_message();
+        } else {
+            $headers = wp_remote_retrieve_headers( $response );
+            $cache_control = $headers['cache-control'] ?? '';
+            $expires = $headers['expires'] ?? '';
+            $etag = $headers['etag'] ?? '';
+            $last_modified = $headers['last-modified'] ?? '';
+            $age = $headers['age'] ?? '';
+            $cf_cache_status = $headers['cf-cache-status'] ?? '';
+            $cf_ray = $headers['cf-ray'] ?? '';
+            $x_cache = $headers['x-cache'] ?? '';
+            $via = $headers['via'] ?? '';
+
+            if ( $age !== '' && (int) $age > 0 ) {
+                $verdict = 'Currently served from cache';                
+            } elseif ( str_contains( $cache_control, 'no-store' ) ) {
+                $verdict = 'Not cacheable (no-store)';
+            } elseif ( str_contains( $cache_control, 'public' ) || str_contains( $cache_control, 'max-age' ) || $expires !== '' ) {
+                $verdict = 'Cacheable, but not currently cached, or just unknown if cached at all';
+            } else {
+                $verdict = 'No cache headers found';
+            }
+
+            if ( $cf_ray !== '' ) {
+                $cdn = 'Cloudflare';
+                if ( $cf_cache_status !== '' ) {
+                    $cdn .= ' (' . $cf_cache_status . ')';
+                }
+            } elseif ( str_contains( strtolower( $x_cache ), 'cloudfront' ) ) {
+                $cdn = 'AWS CloudFront (' . $x_cache . ')';
+            } elseif ( $x_cache !== '' ) {
+                $cdn = 'CDN/proxy detected (x-cache: ' . $x_cache . ')';
+            } elseif ( $via !== '' ) {
+                $cdn = 'Proxy detected (via: ' . $via . ')';
+            } else {
+                $cdn = 'No CDN detected';
+            }
+        }
+
+        return array(
+            'cache_control' => $cache_control,
+            'expires' => $expires,
+            'etag' => $etag,
+            'last_modified' => $last_modified,
+            'age' => $age,
+            'verdict' => $verdict,
+            'error' => $error,
+            'cdn' => $cdn,
+        );
+
     }
 
     public function render_page() {        
@@ -58,6 +129,7 @@ class ITC {
             'age' => '',
             'verdict' => '',
             'error' => '',
+            'cdn' => '',
         );
 
         if ( isset( $_POST['itc_nonce'] ) && wp_verify_nonce( $_POST['itc_nonce'], 'itc_scan' ) ) {
@@ -92,51 +164,7 @@ class ITC {
         </div>
         <?php
     }
-
-    public function scan( $url ) {
-
-        $cache_control = '';
-        $expires = '';
-        $etag = '';
-        $last_modified = '';
-        $age = '';
-        $verdict = '';
-        $error = '';
-
-        $response = wp_remote_get( $url );
-
-        if ( is_wp_error( $response ) ) {
-            $error = $response->get_error_message();
-        } else {
-            $headers = wp_remote_retrieve_headers( $response );
-            $cache_control = $headers['cache-control'] ?? '';
-            $expires = $headers['expires'] ?? '';
-            $etag = $headers['etag'] ?? '';
-            $last_modified = $headers['last-modified'] ?? '';
-            $age = $headers['age'] ?? '';
-
-            if ( $age !== '' && (int) $age > 0 ) {
-                $verdict = 'Currently served from cache';                
-            } elseif ( str_contains( $cache_control, 'no-store' ) ) {
-                $verdict = 'Not cacheable (no-store)';
-            } elseif ( str_contains( $cache_control, 'public' ) || str_contains( $cache_control, 'max-age' ) || $expires !== '' ) {
-                $verdict = 'Cacheable, but not currently cached, or just unknown if cached at all';
-            } else {
-                $verdict = 'No cache headers found';
-            }
-        }
-
-        return array(
-            'cache_control' => $cache_control,
-            'expires' => $expires,
-            'etag' => $etag,
-            'last_modified' => $last_modified,
-            'age' => $age,
-            'verdict' => $verdict,
-            'error' => $error,
-        );
-
-    }
+    
 }
 
 add_action( 'plugins_loaded', array( 'ITC', 'init' ) );
