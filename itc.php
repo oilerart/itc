@@ -44,7 +44,6 @@ class ITC {
             'manage_options',
             'itc',
             array ( $this, 'render_page' ),
-            0,
         );
     }
 
@@ -159,7 +158,8 @@ class ITC {
                 <p>Etag: <?php echo esc_html( $result['etag'] ); ?></p>
                 <p>Last modified: <?php echo esc_html( $result['last_modified'] ); ?></p>
                 <p>Age: <?php echo esc_html( $result['age'] ); ?></p>
-                <p><strong>Verdict: <?php echo esc_html( $result['verdict'] ); ?></strong></p>                
+                <p><strong>Verdict: <?php echo esc_html( $result['verdict'] ); ?></strong></p>
+                <p>CDN: <?php echo esc_html( $result['cdn'] ); ?></p>               
             <?php endif; ?>
         </div>
         <?php
