@@ -27,6 +27,72 @@ function itc_deactivate() {
 
 }
 
+interface ITC_Detector {
+    public function detect($headers);
+}
+
+class ITC_HTTP_Detector implements ITC_Detector {
+
+    public function detect($headers) {
+
+        $cache_control = $headers['cache-control'] ?? '';
+        $expires       = $headers['expires'] ?? '';
+        $etag          = $headers['etag'] ?? '';
+        $last_modified = $headers['last-modified'] ?? '';
+        $age           = $headers['age'] ?? '';
+        $verdict       = '';
+
+        if ( $age !== '' && (int) $age > 0 ) {
+            $verdict = 'Currently served from cache';
+        } elseif ( str_contains( $cache_control, 'no-store' ) ) {
+            $verdict = 'Not cacheable (no-store)';
+        } elseif ( str_contains( $cache_control, 'public' ) || str_contains( $cache_control, 'max-age' ) || $expires !== '' ) {
+            $verdict = 'Cacheable, but not currently cached, or just unknown if cached at all';
+        } else {
+            $verdict = 'No cache headers found';
+        }
+
+        return array(
+            'cache_control' => $cache_control,
+            'expires'       => $expires,
+            'etag'          => $etag,
+            'last_modified' => $last_modified,
+            'age'           => $age,
+            'verdict'       => $verdict,
+        );
+    }
+}
+
+class ITC_CDN_Detector implements ITC_Detector {
+
+    public function detect($headers) {
+
+        $cf_cache_status = $headers['cf-cache-status'] ?? '';
+        $cf_ray = $headers['cf-ray'] ?? '';
+        $x_cache = $headers['x-cache'] ?? '';
+        $via = $headers['via'] ?? '';
+
+        if ( $cf_ray !== '' ) {
+            $cdn = 'Cloudflare';
+            if ( $cf_cache_status !== '' ) {
+                $cdn .= ' (' . $cf_cache_status . ')';
+            }
+        } elseif ( str_contains( strtolower( $x_cache ), 'cloudfront' ) ) {
+            $cdn = 'AWS CloudFront (' . $x_cache . ')';
+        } elseif ( $x_cache !== '' ) {
+            $cdn = 'CDN/proxy detected (x-cache: ' . $x_cache . ')';
+        } elseif ( $via !== '' ) {
+            $cdn = 'Proxy detected (via: ' . $via . ')';
+        } else {
+            $cdn = 'No CDN detected';
+        }
+
+        return array( 'cdn' => $cdn );
+
+    }
+
+}
+
 class ITC {
     
     public function __construct() {
