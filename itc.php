@@ -113,74 +113,33 @@ class ITC {
         );
     }
 
-    public function scan($url) {
+    public function scan( $url ) {
 
-        $error = '';
-        $cache_control = '';
-        $expires = '';
-        $etag = '';
-        $last_modified = '';
-        $age = '';
-        $verdict = '';
-        $cf_cache_status = '';
-        $cf_ray = '';
-        $x_cache = '';
-        $via = '';
-        $cdn = '';
-
-        $response = wp_remote_get( $url );
-
-        if ( is_wp_error( $response ) ) {
-            $error = $response->get_error_message();
-        } else {
-            $headers = wp_remote_retrieve_headers( $response );
-            $cache_control = $headers['cache-control'] ?? '';
-            $expires = $headers['expires'] ?? '';
-            $etag = $headers['etag'] ?? '';
-            $last_modified = $headers['last-modified'] ?? '';
-            $age = $headers['age'] ?? '';
-            $cf_cache_status = $headers['cf-cache-status'] ?? '';
-            $cf_ray = $headers['cf-ray'] ?? '';
-            $x_cache = $headers['x-cache'] ?? '';
-            $via = $headers['via'] ?? '';
-
-            if ( $age !== '' && (int) $age > 0 ) {
-                $verdict = 'Currently served from cache';                
-            } elseif ( str_contains( $cache_control, 'no-store' ) ) {
-                $verdict = 'Not cacheable (no-store)';
-            } elseif ( str_contains( $cache_control, 'public' ) || str_contains( $cache_control, 'max-age' ) || $expires !== '' ) {
-                $verdict = 'Cacheable, but not currently cached, or just unknown if cached at all';
-            } else {
-                $verdict = 'No cache headers found';
-            }
-
-            if ( $cf_ray !== '' ) {
-                $cdn = 'Cloudflare';
-                if ( $cf_cache_status !== '' ) {
-                    $cdn .= ' (' . $cf_cache_status . ')';
-                }
-            } elseif ( str_contains( strtolower( $x_cache ), 'cloudfront' ) ) {
-                $cdn = 'AWS CloudFront (' . $x_cache . ')';
-            } elseif ( $x_cache !== '' ) {
-                $cdn = 'CDN/proxy detected (x-cache: ' . $x_cache . ')';
-            } elseif ( $via !== '' ) {
-                $cdn = 'Proxy detected (via: ' . $via . ')';
-            } else {
-                $cdn = 'No CDN detected';
-            }
-        }
-
-        return array(
-            'cache_control' => $cache_control,
-            'expires' => $expires,
-            'etag' => $etag,
-            'last_modified' => $last_modified,
-            'age' => $age,
-            'verdict' => $verdict,
-            'error' => $error,
-            'cdn' => $cdn,
+        $result = array(
+            'cache_control' => '',
+            'expires'       => '',
+            'etag'          => '',
+            'last_modified' => '',
+            'age'           => '',
+            'verdict'       => '',
+            'cdn'           => '',
+            'error'         => '',
         );
-
+    
+        $response = wp_remote_get( $url );
+    
+        if ( is_wp_error( $response ) ) {
+            $result['error'] = $response->get_error_message();
+            return $result;
+        }
+    
+        $headers = wp_remote_retrieve_headers( $response );
+    
+        // YOUR PART:
+        // 1. create an ITC_HTTP_Detector object and an ITC_CDN_Detector object
+        // 2. merge each one's detect( $headers ) into $result, using the array_merge pattern above
+    
+        return $result;
     }
 
     public function render_page() {        
