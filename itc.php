@@ -131,13 +131,14 @@ class ITC {
         if ( is_wp_error( $response ) ) {
             $result['error'] = $response->get_error_message();
             return $result;
-        }
-    
+        }    
+        
+        $http_detector = new ITC_HTTP_Detector;
+        $cdn_detector = new ITC_CDN_Detector;
         $headers = wp_remote_retrieve_headers( $response );
-    
-        // YOUR PART:
-        // 1. create an ITC_HTTP_Detector object and an ITC_CDN_Detector object
-        // 2. merge each one's detect( $headers ) into $result, using the array_merge pattern above
+        $http_result = $http_detector->detect($headers);
+        $cdn_result = $cdn_detector->detect($headers);
+        $result = array_merge($result, $http_result, $cdn_result);
     
         return $result;
     }
