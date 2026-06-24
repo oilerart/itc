@@ -112,12 +112,20 @@ class ITC_Plugin_Detector implements ITC_Detector {
         $detected = array();
 
         foreach ($known as $plugin => $signal) {
-
+            if ( defined( $signal ) || class_exists( $signal ) ) {
+                $detected[] = $plugin;
+            }
         }
 
-    }
+        if ( empty( $detected ) ) {
+            $cache_plugin = 'No cache plugin detected';
+        } else {
+            $cache_plugin = implode( ', ' , $detected );
+        }
 
-    
+        return array('cache_plugin' => $cache_plugin);
+
+    }    
 
 }
 
@@ -145,13 +153,14 @@ class ITC {
 
         $result = array(
             'cache_control' => '',
-            'expires'       => '',
-            'etag'          => '',
+            'expires' => '',
+            'etag' => '',
             'last_modified' => '',
-            'age'           => '',
-            'verdict'       => '',
-            'cdn'           => '',
-            'error'         => '',
+            'age' => '',
+            'verdict' => '',
+            'cdn' => '',
+            'cache_plugin' => '',
+            'error' => '',
         );
     
         $response = wp_remote_get( $url );
@@ -162,10 +171,12 @@ class ITC {
         }    
         
         $http_detector = new ITC_HTTP_Detector;
-        $cdn_detector = new ITC_CDN_Detector;        
         $http_result = $http_detector->detect( $response );
+        $cdn_detector = new ITC_CDN_Detector;        
         $cdn_result = $cdn_detector->detect( $response );
-        $result = array_merge($result, $http_result, $cdn_result);
+        $cache_plugin_detector = new ITC_Plugin_Detector;
+        $cache_plugin_result = $cache_plugin_detector->detect( $response );
+        $result = array_merge( $result, $http_result, $cdn_result, $cache_plugin_result );
     
         return $result;
     }
@@ -179,9 +190,10 @@ class ITC {
             'etag' => '',
             'last_modified' => '',
             'age' => '',
-            'verdict' => '',
-            'error' => '',
+            'verdict' => '',            
             'cdn' => '',
+            'cache_plugin' => '',
+            'error' => '',
         );
 
         if ( isset( $_POST['itc_nonce'] ) && wp_verify_nonce( $_POST['itc_nonce'], 'itc_scan' ) ) {
@@ -212,7 +224,8 @@ class ITC {
                 <p>Last modified: <?php echo esc_html( $result['last_modified'] ); ?></p>
                 <p>Age: <?php echo esc_html( $result['age'] ); ?></p>
                 <p><strong>Verdict: <?php echo esc_html( $result['verdict'] ); ?></strong></p>
-                <p>CDN: <?php echo esc_html( $result['cdn'] ); ?></p>               
+                <p>CDN: <?php echo esc_html( $result['cdn'] ); ?></p>     
+                <p>Cache plugin: <?php echo esc_html( $result['cache_plugin'] ); ?></p>          
             <?php endif; ?>
         </div>
         <?php
