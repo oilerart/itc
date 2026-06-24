@@ -28,12 +28,14 @@ function itc_deactivate() {
 }
 
 interface ITC_Detector {
-    public function detect($headers);
+    public function detect( $response );
 }
 
 class ITC_HTTP_Detector implements ITC_Detector {
 
-    public function detect($headers) {
+    public function detect( $response ) {
+
+        $headers = wp_remote_retrieve_headers( $response );
 
         $cache_control = $headers['cache-control'] ?? '';
         $expires       = $headers['expires'] ?? '';
@@ -65,7 +67,9 @@ class ITC_HTTP_Detector implements ITC_Detector {
 
 class ITC_CDN_Detector implements ITC_Detector {
 
-    public function detect($headers) {
+    public function detect( $response ) {
+
+        $headers = wp_remote_retrieve_headers( $response );
 
         $cf_cache_status = $headers['cf-cache-status'] ?? '';
         $cf_ray = $headers['cf-ray'] ?? '';
@@ -90,6 +94,30 @@ class ITC_CDN_Detector implements ITC_Detector {
         return array( 'cdn' => $cdn );
 
     }
+
+}
+
+class ITC_Plugin_Detector implements ITC_Detector {
+
+    public function detect( $response ) {
+
+        $known = array(
+            'LiteSpeed Cache'  => 'LSCWP_V',
+            'W3 Total Cache'   => 'W3TC',
+            'WP Super Cache'   => 'WPCACHEHOME',
+            'Hummingbird'      => 'WPHB_VERSION',
+            'WP Fastest Cache' => 'WpFastestCache',
+        );
+
+        $detected = array();
+
+        foreach ($known as $plugin => $signal) {
+
+        }
+
+    }
+
+    
 
 }
 
@@ -134,10 +162,9 @@ class ITC {
         }    
         
         $http_detector = new ITC_HTTP_Detector;
-        $cdn_detector = new ITC_CDN_Detector;
-        $headers = wp_remote_retrieve_headers( $response );
-        $http_result = $http_detector->detect($headers);
-        $cdn_result = $cdn_detector->detect($headers);
+        $cdn_detector = new ITC_CDN_Detector;        
+        $http_result = $http_detector->detect( $response );
+        $cdn_result = $cdn_detector->detect( $response );
         $result = array_merge($result, $http_result, $cdn_result);
     
         return $result;
