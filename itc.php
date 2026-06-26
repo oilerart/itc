@@ -111,7 +111,7 @@ class ITC_Plugin_Detector implements ITC_Detector {
 
         $detected = array();
 
-        foreach ($known as $plugin => $signal) {
+        foreach ( $known as $plugin => $signal ) {
             if ( defined( $signal ) || class_exists( $signal ) ) {
                 $detected[] = $plugin;
             }
@@ -123,7 +123,33 @@ class ITC_Plugin_Detector implements ITC_Detector {
             $cache_plugin = implode( ', ' , $detected );
         }
 
-        return array('cache_plugin' => $cache_plugin);
+        $body = wp_remote_retrieve_body( $response );
+
+        $footprints = array(
+            'WP Super Cache' => 'WP-Super-Cache',
+            'W3 Total Cache' => 'Performance optimized by W3 Total Cache',
+            'LiteSpeed Cache' => 'LiteSpeed Cache',
+            'WP Fastest Cache' => 'WP Fastest Cache',
+        );
+
+        $matches = array();
+
+        foreach ( $footprints as $plugin => $string ) {
+            if ( str_contains( $body, $string ) ) {
+                $matches[] = $plugin;
+            }
+        }
+        
+        if ( empty( $matches ) ) {
+            $cache_plugin_footprint = 'No cache plugin detected';
+        } else {
+            $cache_plugin_footprint = implode( ', ', $matches );
+        }
+
+        return array(
+            'cache_plugin' => $cache_plugin,
+            'cache_plugin_footprint' => $cache_plugin_footprint,
+        );
 
     }    
 
@@ -160,6 +186,7 @@ class ITC {
             'verdict' => '',
             'cdn' => '',
             'cache_plugin' => '',
+            'cache_plugin_footprint' => '',
             'error' => '',
         );
     
@@ -193,6 +220,7 @@ class ITC {
             'verdict' => '',            
             'cdn' => '',
             'cache_plugin' => '',
+            'cache_plugin_footprint' => '',
             'error' => '',
         );
 
@@ -225,7 +253,8 @@ class ITC {
                 <p>Age: <?php echo esc_html( $result['age'] ); ?></p>
                 <p><strong>Verdict: <?php echo esc_html( $result['verdict'] ); ?></strong></p>
                 <p>CDN: <?php echo esc_html( $result['cdn'] ); ?></p>     
-                <p>Cache plugin: <?php echo esc_html( $result['cache_plugin'] ); ?></p>          
+                <p>Cache plugin: <?php echo esc_html( $result['cache_plugin'] ); ?></p>
+                <p>Cache plugin footprint: <?php echo esc_html( $result['cache_plugin_footprint'] ); ?></p>          
             <?php endif; ?>
         </div>
         <?php
