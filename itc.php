@@ -38,11 +38,11 @@ class ITC_HTTP_Detector implements ITC_Detector {
         $headers = wp_remote_retrieve_headers( $response );
 
         $cache_control = $headers['cache-control'] ?? '';
-        $expires       = $headers['expires'] ?? '';
-        $etag          = $headers['etag'] ?? '';
+        $expires = $headers['expires'] ?? '';
+        $etag = $headers['etag'] ?? '';
         $last_modified = $headers['last-modified'] ?? '';
-        $age           = $headers['age'] ?? '';
-        $verdict       = '';
+        $age = $headers['age'] ?? '';
+        $verdict = '';
 
         if ( $age !== '' && (int) $age > 0 ) {
             $verdict = 'Currently served from cache';
@@ -155,6 +155,24 @@ class ITC_Plugin_Detector implements ITC_Detector {
 
 }
 
+class ITC_Server_Detector implements ITC_Detector {
+        
+    public function detect( $response ) {
+
+        $headers = wp_remote_retrieve_headers( $response );
+
+        $server = $headers['server'] ?? '';
+        $x_varnish = $headers['x-varnish'] ?? '';
+
+        return array(
+            'server' => $server,
+            'varnish' => $x_varnish,            
+        );
+
+    }
+
+}
+
 class ITC {
     
     public function __construct() {
@@ -187,6 +205,8 @@ class ITC {
             'cdn' => '',
             'cache_plugin' => '',
             'cache_plugin_footprint' => '',
+            'server' => '',
+            'varnish' => '',
             'error' => '',
         );
     
@@ -199,16 +219,22 @@ class ITC {
         
         $http_detector = new ITC_HTTP_Detector;
         $http_result = $http_detector->detect( $response );
+
         $cdn_detector = new ITC_CDN_Detector;        
         $cdn_result = $cdn_detector->detect( $response );
+
         $cache_plugin_detector = new ITC_Plugin_Detector;
         $cache_plugin_result = $cache_plugin_detector->detect( $response );
-        $result = array_merge( $result, $http_result, $cdn_result, $cache_plugin_result );
+
+        $server_detector = new ITC_Server_Detector;
+        $server_result = $server_detector->detect( $response );
+        
+        $result = array_merge( $result, $http_result, $cdn_result, $cache_plugin_result, $server_result );
     
         return $result;
     }
 
-    public function render_page() {        
+    public function render_page() {
         
         $scanned_url = '';
         $result = array(
@@ -221,6 +247,8 @@ class ITC {
             'cdn' => '',
             'cache_plugin' => '',
             'cache_plugin_footprint' => '',
+            'server' => '',
+            'varnish' => '',
             'error' => '',
         );
 
@@ -254,7 +282,9 @@ class ITC {
                 <p><strong>Verdict: <?php echo esc_html( $result['verdict'] ); ?></strong></p>
                 <p>CDN: <?php echo esc_html( $result['cdn'] ); ?></p>     
                 <p>Cache plugin: <?php echo esc_html( $result['cache_plugin'] ); ?></p>
-                <p>Cache plugin footprint: <?php echo esc_html( $result['cache_plugin_footprint'] ); ?></p>          
+                <p>Cache plugin footprint: <?php echo esc_html( $result['cache_plugin_footprint'] ); ?></p>
+                <p>Server: <?php echo esc_html( $result['server'] ); ?> </p>
+                <p>Varnish: <?php echo esc_html( $result['varnish'] ); ?> </p>
             <?php endif; ?>
         </div>
         <?php
