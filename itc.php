@@ -163,10 +163,18 @@ class ITC_Server_Detector implements ITC_Detector {
 
         $server = $headers['server'] ?? '';
         $x_varnish = $headers['x-varnish'] ?? '';
+        $varnish_verdict = '';
+
+        if ( str_contains( $x_varnish, ' ' ) ) {
+            $varnish_verdict = 'Varnish caching detected';
+        } else {
+            $varnish_verdict = 'Likely not cached by varnish';
+        }
 
         return array(
             'server' => $server,
-            'varnish' => $x_varnish,            
+            'varnish' => $x_varnish,
+            'varnish_verdict' = $varnish_verdict,
         );
 
     }
@@ -207,6 +215,7 @@ class ITC {
             'cache_plugin_footprint' => '',
             'server' => '',
             'varnish' => '',
+            'varnish_verdict' = '',
             'error' => '',
         );
     
@@ -249,6 +258,7 @@ class ITC {
             'cache_plugin_footprint' => '',
             'server' => '',
             'varnish' => '',
+            'varnish_verdict' = '',
             'error' => '',
         );
 
