@@ -163,18 +163,22 @@ class ITC_Server_Detector implements ITC_Detector {
 
         $server = $headers['server'] ?? '';
         $x_varnish = $headers['x-varnish'] ?? '';
+        $via = $headers['via'] ?? '';
         $varnish_verdict = '';
 
         if ( str_contains( $x_varnish, ' ' ) ) {
-            $varnish_verdict = 'Varnish caching detected';
+            $varnish_verdict = 'Varnish HIT';
+        } elseif ( $x_varnish !== '' ) {
+            $varnish_verdict = 'Varnish detected (miss)';
+        }  elseif ( str_contains( strtolower( $via ), 'varnish' ) ) {
+            $varnish_verdict = 'Varnish detected (via)';
         } else {
-            $varnish_verdict = 'Likely not cached by varnish';
+            $varnish_verdict = 'No varnish detected';
         }
 
         return array(
             'server' => $server,
-            'varnish' => $x_varnish,
-            'varnish_verdict' = $varnish_verdict,
+            'varnish_verdict' => $varnish_verdict,
         );
 
     }
@@ -214,8 +218,7 @@ class ITC {
             'cache_plugin' => '',
             'cache_plugin_footprint' => '',
             'server' => '',
-            'varnish' => '',
-            'varnish_verdict' = '',
+            'varnish_verdict' => '',
             'error' => '',
         );
     
@@ -257,8 +260,7 @@ class ITC {
             'cache_plugin' => '',
             'cache_plugin_footprint' => '',
             'server' => '',
-            'varnish' => '',
-            'varnish_verdict' = '',
+            'varnish_verdict' => '',
             'error' => '',
         );
 
@@ -294,7 +296,7 @@ class ITC {
                 <p>Cache plugin: <?php echo esc_html( $result['cache_plugin'] ); ?></p>
                 <p>Cache plugin footprint: <?php echo esc_html( $result['cache_plugin_footprint'] ); ?></p>
                 <p>Server: <?php echo esc_html( $result['server'] ); ?> </p>
-                <p>Varnish: <?php echo esc_html( $result['varnish'] ); ?> </p>
+                <p>Varnish verdict: <?php echo esc_html( $result['varnish_verdict'] ); ?> </p>
             <?php endif; ?>
         </div>
         <?php
