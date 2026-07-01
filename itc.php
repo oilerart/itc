@@ -165,6 +165,10 @@ class ITC_Server_Detector implements ITC_Detector {
         $x_varnish = $headers['x-varnish'] ?? '';
         $via = $headers['via'] ?? '';
         $varnish_verdict = '';
+        $kinsta = $headers['x-kinsta-cache'] ?? '';
+        $wpengine = $headers['x-powered-by'] ?? '';
+        $siteground = $headers['x-proxy-cache'] ?? '';
+        $host = '';
 
         if ( str_contains( $x_varnish, ' ' ) ) {
             $varnish_verdict = 'Varnish HIT';
@@ -176,9 +180,20 @@ class ITC_Server_Detector implements ITC_Detector {
             $varnish_verdict = 'No varnish detected';
         }
 
+        if ( $kinsta !== '' ) {
+            $host = 'Kinsta';
+        } elseif ( str_contains( strtolower( $wpengine ), 'WP Engine' ) ) {
+            $host = 'WP Engine';
+        } elseif ( $siteground !== '') {
+            $host = 'SiteGround (or Nginx proxy)';
+        } else {
+            $host = 'Host not defined';
+        }
+
         return array(
             'server' => $server,
             'varnish_verdict' => $varnish_verdict,
+            'host' => $host,
         );
 
     }
@@ -219,6 +234,7 @@ class ITC {
             'cache_plugin_footprint' => '',
             'server' => '',
             'varnish_verdict' => '',
+            'host' => '',
             'error' => '',
         );
     
@@ -261,6 +277,7 @@ class ITC {
             'cache_plugin_footprint' => '',
             'server' => '',
             'varnish_verdict' => '',
+            'host' => '',
             'error' => '',
         );
 
@@ -297,6 +314,7 @@ class ITC {
                 <p>Cache plugin footprint: <?php echo esc_html( $result['cache_plugin_footprint'] ); ?></p>
                 <p>Server: <?php echo esc_html( $result['server'] ); ?> </p>
                 <p>Varnish verdict: <?php echo esc_html( $result['varnish_verdict'] ); ?> </p>
+                <p>Host: <?php echo esc_html( $result['host'] ); ?></p>
             <?php endif; ?>
         </div>
         <?php
