@@ -200,6 +200,42 @@ class ITC_Server_Detector implements ITC_Detector {
 
 }
 
+class ITC_Object_Cache_Detector implements ITC_Detector {
+
+    public function detect( $response ) {
+
+        if ( wp_using_ext_object_cache() ) {
+            $object_cache = 'Persistent object cache active';
+        } else {
+            $object_cache = 'No persistent object cache';
+        }
+
+        return array(
+            'object_cache' => $object_cache,
+        );
+
+    }
+
+}
+
+class ITC_OPcache_Detector implements ITC_Detector {
+
+    public function detect ( $response ) {
+
+        if ( function_exists( 'opcache_get_status' ) ) {
+            $opcache = 'OPcache enabled';
+        } else {
+            $opcache = 'OPcache not enabled';
+        }
+
+        return array(
+            'opcache' => $opcache,
+        );
+
+    }
+
+}
+
 class ITC {
     
     public function __construct() {
