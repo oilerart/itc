@@ -182,7 +182,7 @@ class ITC_Server_Detector implements ITC_Detector {
 
         if ( $kinsta !== '' ) {
             $host = 'Kinsta';
-        } elseif ( str_contains( strtolower( $wpengine ), 'WP Engine' ) ) {
+        } elseif ( str_contains( strtolower( $wpengine ), 'wp engine' ) ) {
             $host = 'WP Engine';
         } elseif ( $siteground !== '') {
             $host = 'SiteGround (or Nginx proxy)';
@@ -222,7 +222,7 @@ class ITC_OPcache_Detector implements ITC_Detector {
 
     public function detect ( $response ) {
 
-        if ( function_exists( 'opcache_get_status' ) ) {
+        if ( function_exists( 'opcache_get_status' ) && opcache_get_status( false ) ) {
             $opcache = 'OPcache enabled';
         } else {
             $opcache = 'OPcache not enabled';
@@ -271,6 +271,8 @@ class ITC {
             'server' => '',
             'varnish_verdict' => '',
             'host' => '',
+            'object_cache' => '',
+            'opcache' => '',
             'error' => '',
         );
     
@@ -292,8 +294,14 @@ class ITC {
 
         $server_detector = new ITC_Server_Detector;
         $server_result = $server_detector->detect( $response );
+
+        $object_cache_detector = new ITC_Object_Cache_Detector;
+        $object_cache_result = $object_cache_detector->detect( $response );
+
+        $opcache_detector = new ITC_OPcache_Detector;
+        $opcache_result = $opcache_detector->detect( $response );
         
-        $result = array_merge( $result, $http_result, $cdn_result, $cache_plugin_result, $server_result );
+        $result = array_merge( $result, $http_result, $cdn_result, $cache_plugin_result, $server_result, $object_cache_result, $opcache_result );
     
         return $result;
     }
@@ -314,6 +322,8 @@ class ITC {
             'server' => '',
             'varnish_verdict' => '',
             'host' => '',
+            'object_cache' => '',
+            'opcache' => '',
             'error' => '',
         );
 
@@ -351,6 +361,8 @@ class ITC {
                 <p>Server: <?php echo esc_html( $result['server'] ); ?> </p>
                 <p>Varnish verdict: <?php echo esc_html( $result['varnish_verdict'] ); ?> </p>
                 <p>Host: <?php echo esc_html( $result['host'] ); ?></p>
+                <p>Object cache: <?php echo esc_html( $result['object_cache'] ); ?></p>
+                <p>OPcache: <?php echo esc_html( $result['opcache'] ); ?></p>
             <?php endif; ?>
         </div>
         <?php
