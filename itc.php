@@ -28,7 +28,9 @@ function itc_deactivate() {
 }
 
 interface ITC_Detector {
+
     public function detect( $response );
+
 }
 
 class ITC_HTTP_Detector implements ITC_Detector {
@@ -256,7 +258,7 @@ class ITC {
         );
     }
 
-    public function scan( $url ) {
+    public function scan( $url, $cookies = array() ) {
 
         $result = array(
             'cache_control' => '',
@@ -276,7 +278,7 @@ class ITC {
             'error' => '',
         );
     
-        $response = wp_remote_get( $url );
+        $response = wp_remote_get( $url, array( 'cookies' => $cookies ) );
     
         if ( is_wp_error( $response ) ) {
             $result['error'] = $response->get_error_message();
@@ -306,68 +308,72 @@ class ITC {
         return $result;
     }
 
-    public function render_page() {
-        
-        $scanned_url = '';
-        $result = array(
-            'cache_control' => '',
-            'expires' => '',
-            'etag' => '',
-            'last_modified' => '',
-            'age' => '',
-            'verdict' => '',            
-            'cdn' => '',
-            'cache_plugin' => '',
-            'cache_plugin_footprint' => '',
-            'server' => '',
-            'varnish_verdict' => '',
-            'host' => '',
-            'object_cache' => '',
-            'opcache' => '',
-            'error' => '',
-        );
+        public function render_page() {
+            
+            $default = array(
+                'cache_control' => '',
+                'expires' => '',
+                'etag' => '',
+                'last_modified' => '',
+                'age' => '',
+                'verdict' => '',            
+                'cdn' => '',
+                'cache_plugin' => '',
+                'cache_plugin_footprint' => '',
+                'server' => '',
+                'varnish_verdict' => '',
+                'host' => '',
+                'object_cache' => '',
+                'opcache' => '',
+                'error' => '',
+            );
 
-        if ( isset( $_POST['itc_nonce'] ) && wp_verify_nonce( $_POST['itc_nonce'], 'itc_scan' ) ) {
-            $scanned_url = esc_url_raw( $_POST['itc_url'] ?? '' );
+            $result_anon = $default;
+            $result_auth = $default;
+            $scanned_url = '';
 
-            if ( $scanned_url ) {
-                $result = $this->scan( $scanned_url );
+            if ( isset( $_POST['itc_nonce'] ) && wp_verify_nonce( $_POST['itc_nonce'], 'itc_scan' ) ) {
+                $scanned_url = esc_url_raw( $_POST['itc_url'] ?? '' );
+
+                if ( $scanned_url ) {
+                    $result_anon = $this->scan( $scanned_url );
+                    $result_auth = $this->scan( $scanned_url, $_COOKIE );
+                }
             }
+            
+            ?>
+
+            <div class="wrap">
+                <h1>Is this cached?</h1>
+                <form method="post">
+                    <?php wp_nonce_field( 'itc_scan', 'itc_nonce' ); ?>
+                    <input type="url" name="itc_url" placeholder="https://example.com" class="regular-text">
+                    <input type="submit" class="button button-primary" value="Scan">
+                </form>
+
+                <?php if ( $result_anon['error'] ) : ?>
+                    <p>Error: <?php echo esc_html( $result_anon['error'] ); ?></p>
+                <?php elseif ( $scanned_url ) : ?>
+                    <p>Scanning: <?php echo esc_url( $scanned_url ); ?></p>
+                    <p>Cache control: <?php echo esc_html( $result_anon['cache_control'] ); ?></p>
+                    <p>Expires: <?php echo esc_html( $result_anon['expires'] ); ?></p>
+                    <p>Etag: <?php echo esc_html( $result_anon['etag'] ); ?></p>
+                    <p>Last modified: <?php echo esc_html( $result_anon['last_modified'] ); ?></p>
+                    <p>Age: <?php echo esc_html( $result_anon['age'] ); ?></p>
+                    <p><strong>Verdict: <?php echo esc_html( $result_anon['verdict'] ); ?></strong></p>
+                    <p>CDN: <?php echo esc_html( $result_anon['cdn'] ); ?></p>     
+                    <p>Cache plugin: <?php echo esc_html( $result_anon['cache_plugin'] ); ?></p>
+                    <p>Cache plugin footprint: <?php echo esc_html( $result_anon['cache_plugin_footprint'] ); ?></p>
+                    <p>Server: <?php echo esc_html( $result_anon['server'] ); ?> </p>
+                    <p>Varnish verdict: <?php echo esc_html( $result_anon['varnish_verdict'] ); ?> </p>
+                    <p>Host: <?php echo esc_html( $result_anon['host'] ); ?></p>
+                    <p>Object cache: <?php echo esc_html( $result_anon['object_cache'] ); ?></p>
+                    <p>OPcache: <?php echo esc_html( $result_anon['opcache'] ); ?></p>
+                <?php endif; ?>
+            </div>
+            <?php
         }
         
-        ?>
-
-        <div class="wrap">
-            <h1>Is this cached?</h1>
-            <form method="post">
-                <?php wp_nonce_field( 'itc_scan', 'itc_nonce' ); ?>
-                <input type="url" name="itc_url" placeholder="https://example.com" class="regular-text">
-                <input type="submit" class="button button-primary" value="Scan">
-            </form>
-
-            <?php if ( $result['error'] ) : ?>
-                <p>Error: <?php echo esc_html( $result['error'] ); ?></p>
-            <?php elseif ( $scanned_url ) : ?>
-                <p>Scanning: <?php echo esc_url( $scanned_url ); ?></p>
-                <p>Cache control: <?php echo esc_html( $result['cache_control'] ); ?></p>
-                <p>Expires: <?php echo esc_html( $result['expires'] ); ?></p>
-                <p>Etag: <?php echo esc_html( $result['etag'] ); ?></p>
-                <p>Last modified: <?php echo esc_html( $result['last_modified'] ); ?></p>
-                <p>Age: <?php echo esc_html( $result['age'] ); ?></p>
-                <p><strong>Verdict: <?php echo esc_html( $result['verdict'] ); ?></strong></p>
-                <p>CDN: <?php echo esc_html( $result['cdn'] ); ?></p>     
-                <p>Cache plugin: <?php echo esc_html( $result['cache_plugin'] ); ?></p>
-                <p>Cache plugin footprint: <?php echo esc_html( $result['cache_plugin_footprint'] ); ?></p>
-                <p>Server: <?php echo esc_html( $result['server'] ); ?> </p>
-                <p>Varnish verdict: <?php echo esc_html( $result['varnish_verdict'] ); ?> </p>
-                <p>Host: <?php echo esc_html( $result['host'] ); ?></p>
-                <p>Object cache: <?php echo esc_html( $result['object_cache'] ); ?></p>
-                <p>OPcache: <?php echo esc_html( $result['opcache'] ); ?></p>
-            <?php endif; ?>
-        </div>
-        <?php
-    }
-    
 }
 
 add_action( 'plugins_loaded', array( 'ITC', 'init' ) );
