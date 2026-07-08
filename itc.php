@@ -360,7 +360,8 @@ class ITC {
                     <p>Etag: <?php echo esc_html( $result_anon['etag'] ); ?></p>
                     <p>Last modified: <?php echo esc_html( $result_anon['last_modified'] ); ?></p>
                     <p>Age: <?php echo esc_html( $result_anon['age'] ); ?></p>
-                    <p><strong>Verdict: <?php echo esc_html( $result_anon['verdict'] ); ?></strong></p>
+                    <p><strong>Verdict (logged out): <?php echo esc_html( $result_anon['verdict'] ); ?></strong></p>
+                    <p>Verdict (logged in): <?php echo esc_html( $result_auth['verdict'] ); ?></p>
                     <p>CDN: <?php echo esc_html( $result_anon['cdn'] ); ?></p>     
                     <p>Cache plugin: <?php echo esc_html( $result_anon['cache_plugin'] ); ?></p>
                     <p>Cache plugin footprint: <?php echo esc_html( $result_anon['cache_plugin_footprint'] ); ?></p>
